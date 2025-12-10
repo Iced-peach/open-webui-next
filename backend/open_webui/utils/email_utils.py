@@ -20,17 +20,19 @@ def send_email(
     smtp_password: str = "",
     from_email: str,
 ):
-    """发送纯文本邮件；默认使用 SMTPS (SSL) 直连端口，如 465"""
+    """
+    - 使用 SMTP 明文连接，再 STARTTLS，再登录发送
+    """
     msg = MIMEText(body)
     msg["Subject"] = subject
     msg["From"] = from_email
     msg["To"] = to_email
 
-    with smtplib.SMTP_SSL(smtp_server, smtp_port, timeout=10) as server:
+    with smtplib.SMTP(smtp_server, smtp_port, timeout=10) as server:
+        server.starttls()
         if smtp_username and smtp_password:
             server.login(smtp_username, smtp_password)
         server.sendmail(from_email, [to_email], msg.as_string())
-
 
 def generate_verification_code(length: int = 6) -> str:
     alphabet = "0123456789"
