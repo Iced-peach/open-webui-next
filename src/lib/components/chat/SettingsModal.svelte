@@ -663,7 +663,7 @@
 								</div>
 								<div class=" self-center">{$i18n.t('Interface')}</div>
 							</button> -->
-						{:else if tabId === 'connections'}
+						<!-- {:else if tabId === 'connections'}
 							{#if $user?.role === 'admin' || ($user?.role === 'user' && $config?.features?.enable_direct_connections)}
 								<button
 									role="tab"
@@ -688,7 +688,7 @@
 									</div>
 									<div class=" self-center">{$i18n.t('Connections')}</div>
 								</button>
-							{/if}
+							{/if} -->
 						{:else if tabId === 'tools'}
 							{#if $user?.role === 'admin' || ($user?.role === 'user' && $user?.permissions?.features?.direct_tool_servers)}
 								<button
