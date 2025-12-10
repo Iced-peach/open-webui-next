@@ -396,6 +396,12 @@
 									</span>
 								</div>
 
+								<div class="flex flex-wrap gap-1 text-[11px] text-gray-600 dark:text-gray-400 mt-1">
+									<span class="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800">
+										{$i18n.t('Provider')}: {model?.provider ?? '-'}
+									</span>
+								</div>
+
 								<!-- 定价信息 -->
 								{#if model.pricing || modelPricings[model.id]}
 									{@const pricing = model.pricing || modelPricings[model.id]}

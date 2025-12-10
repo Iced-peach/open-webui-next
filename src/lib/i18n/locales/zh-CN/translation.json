@@ -1260,6 +1260,8 @@
 	"Prompts": "提示词",
 	"Prompts Access": "访问提示词",
 	"Prompts Public Sharing": "提示词公开共享",
+	"Provider": "供应商",
+	"Model provider": "模型供应商",
 	"Provider Type": "服务提供商类型",
 	"Public": "公共",
 	"Pull \"{{searchValue}}\" from Ollama.com": "从 Ollama.com 下载 “{{searchValue}}”",

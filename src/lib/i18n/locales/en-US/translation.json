@@ -1260,6 +1260,8 @@
 	"Prompts": "",
 	"Prompts Access": "",
 	"Prompts Public Sharing": "",
+	"Provider": "Provider",
+	"Model provider": "Model provider",
 	"Provider Type": "",
 	"Public": "",
 	"Pull \"{{searchValue}}\" from Ollama.com": "",

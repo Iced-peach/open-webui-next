@@ -50,6 +50,7 @@
 
 	let id = '';
 	let name = '';
+	let provider = '';
 
 	let enableDescription = true;
 
@@ -66,6 +67,7 @@
 	let info = {
 		id: '',
 		base_model_id: null,
+		provider: null,
 		name: '',
 		meta: {
 			profile_image_url: `${WEBUI_BASE_URL}/static/favicon.png`,
@@ -144,6 +146,7 @@
 		}
 
 		info.params = { ...info.params, ...params };
+		info.provider = provider.trim() === '' ? null : provider.trim();
 
 		info.access_control = accessControl;
 		info.meta.capabilities = capabilities;
@@ -257,6 +260,8 @@
 						','
 					)
 				: null;
+
+			provider = model?.provider ?? '';
 
 			knowledge = (model?.meta?.knowledge ?? []).map((item) => {
 				if (item?.collection_name && item?.type !== 'file') {
@@ -509,6 +514,15 @@
 						</div>
 					</div>
 
+					<div class="my-1">
+						<div class=" text-sm font-semibold mb-1">{$i18n.t('Provider')}</div>
+						<input
+							class="text-sm w-full bg-transparent outline-hidden"
+							placeholder={$i18n.t('Model provider')}
+							bind:value={provider}
+						/>
+					</div>
+
 					{#if preset}
 						<div class="my-1">
 							<div class=" text-sm font-semibold mb-1">{$i18n.t('Base Model (From)')}</div>
@@ -520,6 +534,10 @@
 									bind:value={info.base_model_id}
 									on:change={(e) => {
 										addUsage(e.target.value);
+										const baseModel = $models.find((m) => m.id === e.target.value);
+										if (!provider && baseModel?.owned_by) {
+											provider = baseModel.owned_by;
+										}
 									}}
 									required
 								>
