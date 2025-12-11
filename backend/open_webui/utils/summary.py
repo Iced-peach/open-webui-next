@@ -132,6 +132,7 @@ class HistorySummarizer:
         *,
         existing_summary: Optional[str] = None,
         max_tokens: Optional[int] = None,
+        user: Optional[Any] = None,
     ) -> Optional[HistorySummary]:
         if not messages and not existing_summary:
             return None
@@ -172,6 +173,36 @@ class HistorySummarizer:
             # Debug: Print full response to investigate empty content issues
             log.info(f"Full Summary API Response: {response}")
 
+            # === 计费逻辑接入 ===
+            if user and hasattr(response, "usage") and response.usage:
+                try:
+                    from open_webui.utils.billing import deduct_balance
+                    
+                    # 确定用户ID
+                    user_id = getattr(user, "id", str(user))
+                    
+                    usage = response.usage
+                    prompt_tokens = usage.prompt_tokens
+                    completion_tokens = usage.completion_tokens
+                    
+                    cost, balance = deduct_balance(
+                        user_id=user_id,
+                        model_id=self._model,
+                        prompt_tokens=prompt_tokens,
+                        completion_tokens=completion_tokens,
+                        log_type="deduct_summary"  # 标记为摘要扣费
+                    )
+                    
+                    log.info(
+                        f"摘要生成计费成功: user={user_id} model={self._model} "
+                        f"tokens={prompt_tokens}+{completion_tokens} "
+                        f"cost={cost / 10000:.4f}元 balance={balance / 10000:.4f}元"
+                    )
+                except Exception as e:
+                    # 计费失败不应中断摘要生成，只记录日志
+                    log.error(f"摘要生成计费失败: {e}")
+            # ===================
+
             payload = response.choices[0].message.content or ""
             finish_reason = response.choices[0].finish_reason
             
@@ -193,6 +224,7 @@ class HistorySummarizer:
         summary_b: str,
         *,
         max_tokens: Optional[int] = None,
+        user: Optional[Any] = None,
     ) -> Optional[HistorySummary]:
         if not summary_a and not summary_b:
             return None
@@ -216,6 +248,31 @@ class HistorySummarizer:
                 temperature=self._temperature,
             )
             
+            # === 计费逻辑接入 ===
+            if user and hasattr(response, "usage") and response.usage:
+                try:
+                    from open_webui.utils.billing import deduct_balance
+                    
+                    user_id = getattr(user, "id", str(user))
+                    usage = response.usage
+                    
+                    cost, balance = deduct_balance(
+                        user_id=user_id,
+                        model_id=self._model,
+                        prompt_tokens=usage.prompt_tokens,
+                        completion_tokens=usage.completion_tokens,
+                        log_type="deduct_summary_merge"
+                    )
+                    
+                    log.info(
+                        f"摘要合并计费成功: user={user_id} model={self._model} "
+                        f"tokens={usage.prompt_tokens}+{usage.completion_tokens} "
+                        f"cost={cost / 10000:.4f}元 balance={balance / 10000:.4f}元"
+                    )
+                except Exception as e:
+                    log.error(f"摘要合并计费失败: {e}")
+            # ===================
+
             payload = response.choices[0].message.content or ""
             log.info("Summary merge completed successfully.")
             return self._parse_response(payload)
@@ -426,7 +483,12 @@ def slice_messages_with_summary(
     return ordered
 
 
-def summarize(messages: List[Dict], old_summary: Optional[str] = None, model: Optional[str] = None) -> str:
+def summarize(
+    messages: List[Dict],
+    old_summary: Optional[str] = None,
+    model: Optional[str] = None,
+    user: Optional[Any] = None
+) -> str:
     """
     生成对话摘要
 
@@ -434,12 +496,13 @@ def summarize(messages: List[Dict], old_summary: Optional[str] = None, model: Op
         messages: 需要摘要的消息列表
         old_summary: 旧摘要
         model: 指定使用的模型 ID（如果为 None，则使用类内部默认值）
+        user: 用户对象或用户ID（用于计费）
 
     返回：
         摘要字符串
     """
     summarizer = HistorySummarizer(model=model) if model else HistorySummarizer()
-    result = summarizer.summarize(messages, existing_summary=old_summary)
+    result = summarizer.summarize(messages, existing_summary=old_summary, user=user)
     return result.summary if result else ""
 
 def compute_token_count(messages: List[Dict]) -> int:

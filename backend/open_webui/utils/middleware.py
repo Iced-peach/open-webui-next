@@ -2095,7 +2095,7 @@ async def process_chat_response(
                             
                             # 获取当前模型ID，确保使用正确的模型进行摘要更新
                             model_id = model.get("id") if model else None
-                            summary_text = summarize(summary_messages, old_summary, model=model_id)
+                            summary_text = summarize(summary_messages, old_summary, model=model_id, user=user)
                             last_msg_id = (
                                 summary_messages[-1].get("id")
                                 if summary_messages
