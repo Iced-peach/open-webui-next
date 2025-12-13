@@ -878,6 +878,18 @@
 				</div>
 			</div>
 		{/if}
+
+		<!-- ICP 备案信息 -->
+		<div class="fixed bottom-4 left-0 right-0 flex justify-center z-50">
+			<a
+				href="https://beian.miit.gov.cn/"
+				target="_blank"
+				rel="noopener noreferrer"
+				class="text-xs text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
+			>
+				鲁ICP备2025203297号-1
+			</a>
+		</div>
 	{/if}
 </div>
 
